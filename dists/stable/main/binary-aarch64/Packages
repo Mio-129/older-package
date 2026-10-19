@@ -1,0 +1,8 @@
+Package: code
+Version: 1.0.0
+Architecture: arm64
+Maintainer: Ömer Baki
+Filename: https://github.com/Mio-129/older-package/releases/download/v1.0.0/vs-code.deb
+Size: 239616000
+Description: Visual Studio Code for Termux
+

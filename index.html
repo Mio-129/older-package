@@ -23,9 +23,10 @@
   code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
   a { color: #6cb6ff; }
   .warn { border-left: 3px solid #d9a441; background: #1d1a12; padding: .75rem 1rem; border-radius: 6px; }
+  .err  { border-left: 3px solid #f85149; background: #201214; padding: .75rem 1rem; border-radius: 6px; }
   .ok { border-left: 3px solid #3fb950; background: #10201a; padding: .75rem 1rem; border-radius: 6px; }
   table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-  td, th { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid #262b36; }
+  td, th { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid #262b36; vertical-align: top; }
   th { color: #8b93a3; font-weight: 600; }
   footer { margin-top: 3rem; color: #6b7280; font-size: .85rem; }
 </style>
@@ -35,48 +36,67 @@
   <h1>older-package</h1>
   <p class="sub">Termux (aarch64) için kişisel APT deposu.</p>
 
-  <h2>1. Depoyu ekle</h2>
+  <div class="err">
+    <strong>Durum:</strong> <code>pkg install vs-code</code> şu an
+    <code>404 Not Found</code> verir. Metadata doğru; eksik olan tek şey dosya:
+    <code>vs-code.deb</code> 228.5 MB olduğu için GitHub'ın 100 MB'lık dosya sınırına
+    takılır ve <code>pool/</code> içine konamaz. GitHub Pages yönlendirme de yapamaz.
+  </div>
+
+  <h2>1. sources.list'i temizle</h2>
+  <p><code>older.list</code> + <code>older-package.list</code> mükerrer tanım uyarısı üretir;
+     tek dosya bırak ve fazladan kelime yazma:</p>
 <pre><code>pkg update
 mkdir -p $PREFIX/etc/apt/sources.list.d
-echo "deb [trusted=yes arch=aarch64] https://mio-129.github.io/older-package/ stable main" \
+rm -f $PREFIX/etc/apt/sources.list.d/older.list
+echo "deb [trusted=yes arch=aarch64] &lt;BASE_URL&gt; stable main" \
   &gt; $PREFIX/etc/apt/sources.list.d/older-package.list
 pkg update</code></pre>
 
+  <h2>2. Çözüm A — Worker proxy (apt çalışır)</h2>
+  <p><code>proxy/</code> altındaki Cloudflare Worker, <code>/pool/*</code> isteklerini
+     GitHub Release asset'ine 302 ile yönlendirir; metadata Pages'te kalır.</p>
+<pre><code># worker'ı yayınladıktan sonra (bkz. proxy/README.md):
+BASE_URL=https://older-package.&lt;hesabın&gt;.workers.dev/
+
+pkg install vs-code</code></pre>
+  <p>Doğrulama:</p>
+<pre><code>curl -sI $BASE_URL/pool/vs-code.deb | grep -i ^location
+# location: https://github.com/Mio-129/older-package/releases/latest/download/vs-code.deb</code></pre>
+
+  <h2>3. Çözüm B — Elle kurulum (hemen çalışır)</h2>
+<pre><code>curl -L -o $TMPDIR/vs-code.deb \
+  https://github.com/Mio-129/older-package/releases/download/1.0.0/vs-code.deb
+pkg install $TMPDIR/vs-code.deb</code></pre>
+
+  <h2>4. Termux'ta çalışır mı?</h2>
   <div class="warn">
-    <strong>Sadece</strong> <code>::</code> yerine aşağıdaki tek satırı kullanmak yeterli:
-<pre style="margin:.6rem 0 0"><code>echo "deb [trusted=yes arch=aarch64] https://mio-129.github.io/older-package/ stable main" \
-  &gt; $PREFIX/etc/apt/sources.list.d/older-package.list</code></pre>
-  </div>
-
-  <p>Depo eklendikten sonra paket listede görünmeli:</p>
-<pre><code>pkg search vs-code
-apt-cache policy vs-code</code></pre>
-
-  <h2>2. Kur</h2>
-<pre><code>pkg install vs-code</code></pre>
-
-  <div class="ok">
-    VS Code, Termux'ta X11 (VNC / Termux:X11) gerektirir. Resmî olarak paketlenmiş
-    sürüm için <code>pkg install x11-repo &amp;&amp; pkg install code-oss</code> de kullanılabilir.
+    Bu <code>.deb</code> Ubuntu/Debian için derlenmiş (glibc + GTK). Termux bionic libc
+    kullanır; indirme düzelse bile <code>CANNOT LINK EXECUTABLE</code> / eksik
+    <code>libgtk-3.so.0</code> hataları beklenir. Termux için doğru yol:
+<pre style="margin:.6rem 0 0"><code>pkg install x11-repo
+pkg install code-oss</code></pre>
   </div>
 
   <h2>Depo bilgileri</h2>
   <table>
-    <tr><th>Base URL</th><td><code>https://mio-129.github.io/older-package/</code></td></tr>
-    <tr><th>Suite</th><td><code>stable</code></td></tr>
-    <tr><th>Component</th><td><code>main</code></td></tr>
+    <tr><th>Pages base URL</th><td><code>https://mio-129.github.io/older-package/</code></td></tr>
+    <tr><th>Suite / Component</th><td><code>stable</code> / <code>main</code></td></tr>
     <tr><th>Architecture</th><td><code>aarch64</code></td></tr>
     <tr><th>İmza</th><td>yok (<code>trusted=yes</code> gerekli)</td></tr>
+    <tr><th>pool/</th><td>boş — 228.5 MB dosya Pages'e konamaz (100 MB sınırı)</td></tr>
   </table>
 
   <h2>Dosyalar</h2>
   <table>
     <tr><th>Paket listesi</th><td><a href="dists/stable/main/binary-aarch64/Packages">dists/stable/main/binary-aarch64/Packages</a></td></tr>
     <tr><th>Release</th><td><a href="dists/stable/Release">dists/stable/Release</a></td></tr>
+    <tr><th>Release asset</th><td><a href="https://github.com/Mio-129/older-package/releases/download/1.0.0/vs-code.deb">vs-code.deb (239 610 838 bayt)</a></td></tr>
     <tr><th>Kaynak</th><td><a href="https://github.com/Mio-129/older-package">github.com/Mio-129/older-package</a></td></tr>
   </table>
 
-  <footer>Bu depo <code>scripts/update-repo.sh</code> ile GitHub Release'lerinden üretilir.</footer>
+  <footer>Metadata <code>scripts/update-repo.sh</code> ile üretilir,
+  <code>scripts/check-repo.sh</code> ile doğrulanır.</footer>
 </main>
 </body>
 </html>

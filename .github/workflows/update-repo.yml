@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       pool_mode:
-        description: "local (deb'i git'e koy) veya redirect (Release'e 302)"
-        default: local
+        description: "local (deb'i git'e koy, <100MB) | proxy (worker 302) | redirect (_redirects)"
+        default: proxy
 
 permissions:
   contents: write
@@ -26,8 +26,18 @@ jobs:
       - name: Generate repo metadata
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          POOL_MODE: ${{ inputs.pool_mode || 'local' }}
+          POOL_MODE: ${{ inputs.pool_mode || 'proxy' }}
         run: ./scripts/update-repo.sh
+
+      - name: Verify repository
+        env:
+          POOL_MODE: ${{ inputs.pool_mode || 'proxy' }}
+        run: |
+          if [ "$POOL_MODE" = "local" ]; then
+            ./scripts/check-repo.sh --offline --require-pool
+          else
+            ./scripts/check-repo.sh --offline
+          fi
 
       - name: Commit
         run: |

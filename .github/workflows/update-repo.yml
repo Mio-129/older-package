@@ -1,0 +1,42 @@
+name: Update apt repository
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      pool_mode:
+        description: "local (deb'i git'e koy) veya redirect (Release'e 302)"
+        default: local
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: jq
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq jq
+
+      - name: Generate repo metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          POOL_MODE: ${{ inputs.pool_mode || 'local' }}
+        run: ./scripts/update-repo.sh
+
+      - name: Commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Degisiklik yok"
+          else
+            git commit -m "repo: update apt metadata"
+            git push
+          fi

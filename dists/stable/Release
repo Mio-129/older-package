@@ -1,0 +1,14 @@
+Origin: older-package
+Label: older-package
+Suite: stable
+Codename: stable
+Architectures: aarch64
+Components: main
+Description: Termux icin older-package deposu
+Date: Wed, 21 Oct 2026 10:06:27 +0000
+MD5Sum:
+ 4aa0784106ddcce57e9a0be1b2609198 356 main/binary-aarch64/Packages
+ 7806b87923997b2592d356ded61d0b43 282 main/binary-aarch64/Packages.gz
+SHA256:
+ 59709ee8e160e9491a319a1acc47f00017e2633d811431711a83ff731fb8bca1 356 main/binary-aarch64/Packages
+ 6d276e6f9fe9ca043c82e4034a104874f9ddb352afbf0815fda37e28ed711da7 282 main/binary-aarch64/Packages.gz

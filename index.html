@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>older-package · Termux APT Deposu</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1rem 4rem;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0f1115; color: #e6e6e6; line-height: 1.6;
+  }
+  main { max-width: 780px; margin: 0 auto; }
+  h1 { font-size: 1.8rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.1rem; margin-top: 2.2rem; border-bottom: 1px solid #262b36; padding-bottom: .4rem; }
+  p.sub { color: #8b93a3; margin-top: 0; }
+  pre {
+    background: #161a22; border: 1px solid #262b36; border-radius: 8px;
+    padding: .9rem 1rem; overflow-x: auto; font-size: .9rem;
+  }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  a { color: #6cb6ff; }
+  .warn { border-left: 3px solid #d9a441; background: #1d1a12; padding: .75rem 1rem; border-radius: 6px; }
+  .ok { border-left: 3px solid #3fb950; background: #10201a; padding: .75rem 1rem; border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  td, th { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid #262b36; }
+  th { color: #8b93a3; font-weight: 600; }
+  footer { margin-top: 3rem; color: #6b7280; font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>older-package</h1>
+  <p class="sub">Termux (aarch64) için kişisel APT deposu.</p>
+
+  <h2>1. Depoyu ekle</h2>
+<pre><code>pkg update
+mkdir -p $PREFIX/etc/apt/sources.list.d
+echo "deb [trusted=yes arch=aarch64] https://mio-129.github.io/older-package/ stable main" \
+  &gt; $PREFIX/etc/apt/sources.list.d/older-package.list
+pkg update</code></pre>
+
+  <div class="warn">
+    <strong>Sadece</strong> <code>::</code> yerine aşağıdaki tek satırı kullanmak yeterli:
+<pre style="margin:.6rem 0 0"><code>echo "deb [trusted=yes arch=aarch64] https://mio-129.github.io/older-package/ stable main" \
+  &gt; $PREFIX/etc/apt/sources.list.d/older-package.list</code></pre>
+  </div>
+
+  <p>Depo eklendikten sonra paket listede görünmeli:</p>
+<pre><code>pkg search vs-code
+apt-cache policy vs-code</code></pre>
+
+  <h2>2. Kur</h2>
+<pre><code>pkg install vs-code</code></pre>
+
+  <div class="ok">
+    VS Code, Termux'ta X11 (VNC / Termux:X11) gerektirir. Resmî olarak paketlenmiş
+    sürüm için <code>pkg install x11-repo &amp;&amp; pkg install code-oss</code> de kullanılabilir.
+  </div>
+
+  <h2>Depo bilgileri</h2>
+  <table>
+    <tr><th>Base URL</th><td><code>https://mio-129.github.io/older-package/</code></td></tr>
+    <tr><th>Suite</th><td><code>stable</code></td></tr>
+    <tr><th>Component</th><td><code>main</code></td></tr>
+    <tr><th>Architecture</th><td><code>aarch64</code></td></tr>
+    <tr><th>İmza</th><td>yok (<code>trusted=yes</code> gerekli)</td></tr>
+  </table>
+
+  <h2>Dosyalar</h2>
+  <table>
+    <tr><th>Paket listesi</th><td><a href="dists/stable/main/binary-aarch64/Packages">dists/stable/main/binary-aarch64/Packages</a></td></tr>
+    <tr><th>Release</th><td><a href="dists/stable/Release">dists/stable/Release</a></td></tr>
+    <tr><th>Kaynak</th><td><a href="https://github.com/Mio-129/older-package">github.com/Mio-129/older-package</a></td></tr>
+  </table>
+
+  <footer>Bu depo <code>scripts/update-repo.sh</code> ile GitHub Release'lerinden üretilir.</footer>
+</main>
+</body>
+</html>

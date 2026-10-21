@@ -1,0 +1,9 @@
+name = "older-package"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Değiştirmek istersen: wrangler.toml'u düzenle veya
+#   npx wrangler deploy --var POOL_BASE:https://github.com/Mio-129/older-package/releases/download/1.0.0
+[vars]
+PAGES_BASE = "https://mio-129.github.io/older-package"
+POOL_BASE  = "https://github.com/Mio-129/older-package/releases/latest/download"
